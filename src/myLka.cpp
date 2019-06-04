@@ -13,7 +13,13 @@
 using namespace std;
 using namespace cv;
 
+// Coefficient applied to default steering angle
+#define STEERINGCOEF 30;
+
 void Detect();
+extern void colorthresh(cv::Mat input, cv::Mat* ouput);
+extern Point findCentroid(cv::Mat input, cv::Mat* output);
+float chooseDirection(int centroidX, int width);
 
 int main() {
 	cout << "!!! Hello World !!" << endl; // prints !!!Hello World!!!
@@ -21,8 +27,6 @@ int main() {
 	return 0;
 }
 
-extern void colorthresh(cv::Mat input, cv::Mat* ouput);
-extern void findBoundingRect(cv::Mat input, cv::Mat* output);
 
 void Detect() {
 
@@ -36,7 +40,10 @@ void Detect() {
 		// cv::Mat img = Gauss(maskGauss); //BIP removed it because for the moment i do not want to smooth the edges ; impacts below arg
 		cv::Mat colorthresh_image;
 		colorthresh(img, &colorthresh_image);
-		findBoundingRect(colorthresh_image, &img);
+		Point point = findCentroid(colorthresh_image, &img);
+		float angle = chooseDirection(point.x, img.size().width);
+		cout << "angle : " << angle << endl;
+
 	}
 }
 
@@ -69,16 +76,22 @@ void colorthresh(cv::Mat input, cv::Mat* img_mask) {
 	cv::waitKey(2500);
 }
 
-void findBoundingRect(cv::Mat input, cv::Mat* output) {
+Point findCentroid(cv::Mat input, cv::Mat* output) {
 
 	// Perform centroid detection of line (important to do it after the findContours otherwise the circle drawned will be contoured !)
-	auto c_x = 0.0;
 	cv::Moments M = cv::moments(input);
 	if (M.m00 > 0) {
 		cv::Point p1(M.m10 / M.m00, M.m01 / M.m00);
 		cv::circle(*output, p1, 5, cv::Scalar(155, 200, 0), -1);
+		cv::namedWindow("bounding rect");
+		imshow("bounding rect", *output);
+		cv::waitKey(1000);
+		return p1;
+	} else {
+		return Point(-1,-1);
 	}
-	c_x = M.m10 / M.m00;
+//	auto c_x = 0.0;
+//	c_x = M.m10 / M.m00;
 
 //	std::vector<std::vector<cv::Point> > v;
 	// Find contours for better visualisation
@@ -111,9 +124,15 @@ void findBoundingRect(cv::Mat input, cv::Mat* output) {
 //		rectangle(*output, pt1, pt2, CV_RGB(0, 255, 255), 2);
 //		circle(*output, ptmid, 5, cv::Scalar(155, 200, 0), -1);
 //	}
-	cv::namedWindow("bounding rect");
-	imshow("bounding rect", *output);
-	cv::waitKey(10000);
-
 }
+
+float chooseDirection(int centroidX, int width){
+	if(centroidX >= 0){
+		return (float)(centroidX - width/2) / (width/2) * STEERINGCOEF;
+	} else {
+		// did not find any centroid, can not choose direction
+		return 0; //TODO error main method
+	}
+}
+
 
