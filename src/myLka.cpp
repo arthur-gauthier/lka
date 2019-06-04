@@ -22,13 +22,22 @@ extern Point findCentroid(cv::Mat input, cv::Mat* output);
 float chooseDirection(int centroidX, int width);
 
 int main() {
-	cout << "!!! Hello World !!" << endl; // prints !!!Hello World!!!
-	Detect();
+	ProcessLaneKeeping();
 	return 0;
 }
 
 
-void Detect() {
+/**
+*
+ * Input:
+*  -   uint8_t* pixels - RGBA - 4 bytes per pixel
+*  -   uint32 width
+*  -   uint32 height
+* Output:
+*  - float - Steering angle in degrees
+ *
+*/
+float ProcessLaneKeeping(uint8_t* pixels, uint32_t width, uint32_t height) {
 
 	cv::Mat img = imread("/home/ubuntu/git/lka/inputImage.png");
 	if (!img.empty()) {
@@ -43,6 +52,7 @@ void Detect() {
 		Point point = findCentroid(colorthresh_image, &img);
 		float angle = chooseDirection(point.x, img.size().width);
 		cout << "angle : " << angle << endl;
+		return angle;
 
 	}
 }
