@@ -25,9 +25,9 @@ float chooseDirection(int centroidX, int width);
 
 int main() {
 
-	cv::Mat img = imread("/home/ubuntu/git/lka/inputImage.png");
+	cv::Mat img = imread("/home/ubuntu/git/lka/inputImage2.jpg");
 
-	ProcessLaneKeeping(img.data,512,512);
+	ProcessLaneKeeping(img.data,562,316);
 	return 0;
 }
 
@@ -43,7 +43,7 @@ int main() {
  *
 */
 float ProcessLaneKeeping(uint8_t* pixels, uint32_t width, uint32_t height) {
-	Mat img(width,height,CV_8UC3,pixels); //TODO : check width height order TODO 2 : replace CV_8UC3 by CV_8UC4 for RGBA images
+	Mat img(height,width,CV_8UC3,pixels); //TODO : replace CV_8UC3 by CV_8UC4 for RGBA images
 	if (!img.empty()) {
 		if(DEBUG) {
 		 cv::namedWindow("Car View");
