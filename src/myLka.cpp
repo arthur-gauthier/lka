@@ -14,15 +14,20 @@ using namespace std;
 using namespace cv;
 
 // Coefficient applied to default steering angle
-#define STEERINGCOEF 30;
+#define STEERINGCOEF 30
+#define DEBUG 1
 
+float ProcessLaneKeeping(uint8_t* pixels, uint32_t width, uint32_t height);
 void Detect();
 extern void colorthresh(cv::Mat input, cv::Mat* ouput);
 extern Point findCentroid(cv::Mat input, cv::Mat* output);
 float chooseDirection(int centroidX, int width);
 
 int main() {
-	ProcessLaneKeeping();
+
+	cv::Mat img = imread("/home/ubuntu/git/lka/inputImage.png");
+
+	ProcessLaneKeeping(img.data,512,512);
 	return 0;
 }
 
@@ -38,12 +43,13 @@ int main() {
  *
 */
 float ProcessLaneKeeping(uint8_t* pixels, uint32_t width, uint32_t height) {
-
-	cv::Mat img = imread("/home/ubuntu/git/lka/inputImage.png");
+	Mat img(width,height,CV_8UC3,pixels); //TODO : check width height order TODO 2 : replace CV_8UC3 by CV_8UC4 for RGBA images
 	if (!img.empty()) {
-//     cv::namedWindow("Turtlebot View");
-//     imshow("Turtlebot View", img);
-//     cv::waitKey(2500);
+		if(DEBUG) {
+		 cv::namedWindow("Car View");
+		 imshow("Car View", img);
+		 cv::waitKey(2500);
+		}
 
 		// Perform image processing
 		// cv::Mat img = Gauss(maskGauss); //BIP removed it because for the moment i do not want to smooth the edges ; impacts below arg
@@ -73,17 +79,21 @@ void colorthresh(cv::Mat input, cv::Mat* img_mask) {
 	cv::Mat img_hsv;
 
 	cv::cvtColor(input, img_hsv, CV_BGR2HSV);
-	cv::namedWindow("img_hsv");
-	imshow("img_hsv", img_hsv);
-	cv::waitKey(10);
+	if(DEBUG){
+		cv::namedWindow("img_hsv");
+		imshow("img_hsv", img_hsv);
+		cv::waitKey(10);
+	}
 	//	LowerYellow and UpperYellow in BGR format
 	cv::Scalar LowerYellow = { 10, 100, 100 }; //before {10,100,100}
 	cv::Scalar UpperYellow = { 30, 255, 255 };
 	cv::inRange(img_hsv, LowerYellow, UpperYellow, *img_mask);
 	//img_mask(cv::Rect(0, 0, w, 0.8*h)) = 0;
-	cv::namedWindow("mask on HSV");
-	imshow("mask on HSV", *img_mask);
-	cv::waitKey(2500);
+	if(DEBUG){
+		cv::namedWindow("mask on HSV");
+		imshow("mask on HSV", *img_mask);
+		cv::waitKey(2500);
+	}
 }
 
 Point findCentroid(cv::Mat input, cv::Mat* output) {
@@ -93,9 +103,11 @@ Point findCentroid(cv::Mat input, cv::Mat* output) {
 	if (M.m00 > 0) {
 		cv::Point p1(M.m10 / M.m00, M.m01 / M.m00);
 		cv::circle(*output, p1, 5, cv::Scalar(155, 200, 0), -1);
-		cv::namedWindow("bounding rect");
-		imshow("bounding rect", *output);
-		cv::waitKey(1000);
+		if(DEBUG){
+			cv::namedWindow("centroid detection");
+			imshow("centroid detection", *output);
+			cv::waitKey(2000);
+		}
 		return p1;
 	} else {
 		return Point(-1,-1);
