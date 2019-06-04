@@ -14,9 +14,13 @@ using namespace std;
 using namespace cv;
 
 int main() {
+<<<<<<< HEAD
 	cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
 
 
+=======
+	cout << "!!! Hello World !!!" << endl; // prints !!!Hello World!!!
+>>>>>>> branch 'master' of https://github.com/arthur-gauthier/lka.git
 	return 0;
 }
 
